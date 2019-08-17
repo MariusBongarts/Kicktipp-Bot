@@ -25,7 +25,7 @@ jobs:
           PASSWORD: $(password)
           CHROMEDRIVER: $(chromedriver)
 schedules:
-- cron: "*/5 * * * *"
+- cron: "0 12 * * 4"
   displayName: Weekly Thursday build
   branches:
     include:
