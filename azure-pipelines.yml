@@ -27,8 +27,14 @@ jobs:
           TWILIO_ACCOUNT_SID: $(twilio_account_sid)
           TWILIO_AUTH_TOKEN: $(twilio_auth_token)
 schedules:
-- cron: "0 12 * * 4"
-  displayName: Weekly Thursday build
+- cron: "0 12 * * 5"
+  displayName: Weekly Friday build
+  branches:
+    include:
+    - master
+  always: true
+- cron: "0 12 * * 2"
+  displayName: Weekly Tuesday build
   branches:
     include:
     - master
