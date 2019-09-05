@@ -3,6 +3,7 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from Match import Match
 import os
+from twilio.rest import Client
 
 
 class TipBot:
@@ -62,15 +63,25 @@ class TipBot:
             inputs_fields[2].send_keys(tip_tuple[1])
 
     def _get_expected_goals_for_match_as_tuple(self, match):
-        probabilities = [match.odd_home_team_wins, match.odd_draw, match.odd_away_team_wins]
-        index_of_most_probable_event = probabilities.index(min(probabilities))
+        # negative => Home team wins
+        # positive => away team wins
+        diff = match.odd_home_team_wins - match.odd_away_team_wins
 
-        if index_of_most_probable_event == 0:
+        if diff < -2:
+            return 2, 0
+        if diff < -1:
             return 2, 1
-        elif index_of_most_probable_event == 1:
-            return 1, 1
-        elif index_of_most_probable_event == 2:
+        if diff < 0:
+            return 1, 0
+        if diff > 2:
+            return 0, 2
+        if diff > 1:
             return 1, 2
+        if diff > 0:
+            return 1, 2
+        else:
+            return 2, 1
+
 
     def _submit_all_tips(self):
         self.browser.find_element_by_name("submitbutton").click()
@@ -82,6 +93,28 @@ class TipBot:
         self._tip_each_match(most_recent_game_day_matches)
         self._submit_all_tips()
         self.browser.close()
+
+    def sendWhatsApp(self, match_list):
+        msg = self.getMsgForMatches(match_list)
+        account_sid = os.environ['TWILIO_ACCOUNT_SID']
+        auth_token = os.environ['TWILIO_AUTH_TOKEN']
+        client = Client(account_sid, auth_token)
+
+        message = client.messages.create(
+                                    from_='whatsapp:+14155238886',
+                                    body=msg,
+                                    to='whatsapp:+4917647704597'
+                                )
+
+    def getMsgForMatches(self, match_list):
+        msg = 'Kicktip-Soccer-Bot hat folgende Partien erfolgreich getippt:' + '\n'
+        for match in match_list:
+            msg += '\n'
+            tupel = self._get_expected_goals_for_match_as_tuple(match)
+            msg += str(tupel[0]) + ' ' + match.home_team + ' (' + str(match.odd_home_team_wins) + ')' + '\n'
+            msg += str(tupel[1]) + ' ' +  match.away_team + ' (' + str(match.odd_away_team_wins) + ')' + '\n'
+        return msg
+
 
 
 if __name__ == "__main__":
