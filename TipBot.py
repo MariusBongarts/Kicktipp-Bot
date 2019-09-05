@@ -8,6 +8,7 @@ from twilio.rest import Client
 
 class TipBot:
     def __init__(self):
+        self.sendWhatsApp('++++++ Kicktip-Soccer-Bot started ++++++')
         self._initialize_headless_browser()
 
     def _initialize_headless_browser(self):
@@ -52,6 +53,8 @@ class TipBot:
     def _tip_each_match(self, match_list):
         for match in match_list:
             self._fill_tip_input_for_match(match)
+        msg = getMsgForMatches(match_list)
+        self.sendWhatsApp(msg)
 
     def _fill_tip_input_for_match(self, match):
         tip_tuple = self._get_expected_goals_for_match_as_tuple(match)
@@ -94,8 +97,7 @@ class TipBot:
         self._submit_all_tips()
         self.browser.close()
 
-    def sendWhatsApp(self, match_list):
-        msg = self.getMsgForMatches(match_list)
+    def sendWhatsApp(self, msg):
         account_sid = os.environ['TWILIO_ACCOUNT_SID']
         auth_token = os.environ['TWILIO_AUTH_TOKEN']
         client = Client(account_sid, auth_token)
