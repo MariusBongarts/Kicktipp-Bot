@@ -29,16 +29,8 @@ jobs:
 schedules:
 - cron: "0 12 * * 5"
   displayName: Weekly Friday build
-  branches:
-    include:
-    - master
-  always: true
 - cron: "0 12 * * 2"
   displayName: Weekly Tuesday build
-  branches:
-    include:
-    - master
-  always: true
 
 trigger:
   - master
